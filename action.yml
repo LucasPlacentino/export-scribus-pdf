@@ -5,11 +5,27 @@ inputs:
     description: 'Input .sla file'
     required: true
     #default: 'file.sla'
+  pdf-filename:
+    description: 'Output PDF file name'
+    default: '{{ inputs.sla-file }}.pdf' #?
+  compress:
+    description: 'PDF compression: true or false' #?
+    default: true
+  compressmtd:
+    description: 'Image compression: 0=automatic, 1=JPG, 2=PNG'
+    default: 0
+  quality:
+    description: 'PDF quality: 1=high, 2=medium, 3=low'
+    default: 2
+  version:
+    description: 'PDF standard version, eg: 16 = PDF 1.6 standard, 15 = PDF 1.5 standard, etc'
+    default: 16
 outputs:
   pdf-file: # id of output
     description: 'Output PDF file'
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.sla-file }}
+  using: ''
+  #using: 'docker'
+  #image: 'Dockerfile'
+  #args:
+  #  - ${{ inputs.sla-file }}
