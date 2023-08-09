@@ -16,8 +16,8 @@ jobs:
         id: export-scribus-pdf
         uses: ./ # Uses an action in the root directory
         # or use a released GitHub Action
-        # uses: LucasPlacentino/github-action/export-scribus-pdf@1.0.0
+        # uses: LucasPlacentino/github-action/export-scribus-pdf@0.1.0
         with:
           sla-file: 'test.sla'
       - name: Print result
-        run: echo "${{ steps.get_square.outputs.num_squared }}"
+        run: echo "${{ steps.export-scribus-pdf.outputs.pdf-file }}"
