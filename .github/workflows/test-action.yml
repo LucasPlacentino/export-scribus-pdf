@@ -1,0 +1,23 @@
+# TODO
+# .github/workflows/test_action.yml
+name: Test Action
+on: 
+  push:
+  #workflow_dispatch:
+
+jobs:
+  test-export-scibus-pdf:
+    runs-on: ubuntu-latest
+    name: Test the Export Scribus PDF action
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Export Scribus PDF
+        id: export-scribus-pdf
+        uses: ./ # Uses an action in the root directory
+        # or use a released GitHub Action
+        # uses: LucasPlacentino/github-action/export-scribus-pdf@0.1.0
+        with:
+          sla-file: 'test.sla'
+      - name: Print result
+        run: echo "${{ steps.export-scribus-pdf.outputs.pdf-file }}"

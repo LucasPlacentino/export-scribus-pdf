@@ -1,15 +1,66 @@
-name: 'Hello World'
-description: 'Greet someone and record the time'
+name: 'Export Scribus PDF'
+description: 'Export a PDF file from a Scribus/.sla file'
+author: 'Lucas Placentino'
+branding:
+  icon: 'file-text'
+  color: 'white'
 inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
+  sla-file:  # id of input
+    description: 'Input .sla file'
     required: true
-    default: 'World'
+    #default: 'file.sla'
+  pdf-filename:
+    description: 'Output PDF file name'
+    default: '${{ inputs.sla-file }}.pdf' #?
+  compress:
+    description: 'PDF compression: true or false' #?
+    default: true
+  compressmtd:
+    description: 'Image compression: 0=automatic, 1=JPG, 2=PNG'
+    default: 0
+  quality:
+    description: 'PDF quality: 1=high, 2=medium, 3=low'
+    default: 2
+  version:
+    description: 'PDF standard version, eg: 16 = PDF 1.6 standard, 15 = PDF 1.5 standard, etc'
+    default: 16
 outputs:
-  time: # id of output
-    description: 'The time we greeted you'
+  pdf-file: # id of output
+    description: 'Output PDF file'
+    value: ${{ inputs.pdf-filename }} #or ${{ steps.export-pdf.outputs }} ?
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.who-to-greet }}
+  using: 'composite'
+  steps:
+    #or just
+    #- name: Run action script
+    #  run: ${{ github.action_path }}/script.sh
+    #  shell: bash
+    #
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'  
+    - name: Install Dependencies # ? needed ?
+      run: pip install -r requirements.txt
+      shell: bash
+    - name: Get sla2pdf
+      id: get-sla2pdf
+      run: #TODO checkout? https://github.com/sla2pdf-team/sla2pdf
+      shell: bash
+    - name: Install sla2pdf
+      id: install-sla2pdf
+      run: pip install .
+      shell: bash
+    - name: Export PDF file
+      id: export-pdf
+      run: sla2pdf ${{ inputs.sla-file }} -o ${{ inputs.pdf-filename }} compress=${{ inputs.compress }} compressmtd=${{ inputs.compressmtd }} quality=${{ inputs.quality }} version=${{ inputs.version }} # >> $GITHUB_OUTPUT
+      shell: bash
+  #using: 'docker'
+  #image: 'Dockerfile'
+  #args:
+  #  - ${{ inputs.sla-file }}
+  #  - ${{ inputs.pdf-filename }}
+  #  - ${{ inputs.compress }}
+  #  - ${{ inputs.compressmtd }}
+  #  - ${{ inputs.quality }}
+  #  - ${{ inputs.version }}
