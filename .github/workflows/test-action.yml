@@ -19,5 +19,10 @@ jobs:
         # uses: LucasPlacentino/github-action/export-scribus-pdf@0.1.0
         with:
           sla-file: 'test.sla'
-      - name: Print result
+      - name: Print result # ?
         run: echo "${{ steps.export-scribus-pdf.outputs.pdf-file }}"
+      - name: Upload PDF as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: PDF
+          path: ${{ steps.export-scribus-pdf.outputs.pdf-file }}
