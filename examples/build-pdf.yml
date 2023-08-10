@@ -1,0 +1,44 @@
+# --- Example workflow yaml ---
+
+# should be put in .github/workflows/build-pdf.yml
+
+name: Build PDF from Scribus .sla file
+on: 
+  push: # can set to specific branch
+  #pull_request: # can set to specific branch 
+
+jobs:
+  build-scibus-pdf:
+    runs-on: ubuntu-latest
+    name: Build Scribus PDF
+    steps:
+      - name: 🔃 Checkout the code
+        uses: actions/checkout@v2
+      - name: 🛠️ Export Scribus PDF
+        id: export-scribus-pdf
+        uses: ./ # Uses an action in the root directory
+        # or use a released GitHub Action
+        # uses: LucasPlacentino/github-action/export-scribus-pdf@0.1.0
+        with:
+          sla-file: 'your-scribus-file.sla' # <------------------------- put your .sla file name here
+      - name: ✍️ Print result # ?
+        id: print-result
+        run: echo "${{ steps.export-scribus-pdf.outputs.pdf-file }}"
+      - name: 📢 Upload PDF as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: PDF
+          path: ${{ steps.export-scribus-pdf.outputs.pdf-file }}
+      - name: 📦 Push PDF to releases
+        id: pdf-release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ steps.export-scribus-pdf.outputs.pdf-file }}
+          draft: false
+          prerelease: false
+          name: ${{ steps.export-scribus-pdf.outputs.pdf-file }} (Release-${{ github.run_id }}.${{ github.run_attempt }})
+          tag_name: ${{ github.run_id }}.${{ github.run_attempt }}-${{ github.ref }}
+          body: Scribus exported PDF file
+        #env:
+        #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
