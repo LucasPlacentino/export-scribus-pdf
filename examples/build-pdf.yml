@@ -2,10 +2,19 @@
 
 # should be put in .github/workflows/build-pdf.yml
 
+env:
+  SLA_FILENAME: your-scribus-file.sla # <------------------------- put your .sla file name here
+  EXPORTED_PDF_FILENAME: your-exported-pdf-filename.pdf
+  QUALITY: 1
+  COMPRESS:
+  COMPRESSMTD:
+  PDF_VERSION: 16
+  # TODO
+
 name: Build PDF from Scribus .sla file
 on: 
-  push: # can set to specific branch
-  #pull_request: # can set to specific branch 
+  push: # can set to specific branch(es)
+  #pull_request: # can set to specific branch(es)
 
 jobs:
   build-scibus-pdf:
@@ -13,21 +22,31 @@ jobs:
     name: Build Scribus PDF
     steps:
       - name: 🔃 Checkout the code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: 🛠️ Export Scribus PDF
         id: export-scribus-pdf
         uses: ./ # Uses an action in the root directory
         # or use a released GitHub Action
-        # uses: LucasPlacentino/github-action/export-scribus-pdf@0.1.0
+        # uses: LucasPlacentino/export-scribus-pdf@0.1.0
         with:
-          sla-file: 'your-scribus-file.sla' # <------------------------- put your .sla file name here
+          sla-file: $SLA_FILENAME
+          # TODO
+          
+          
+          
       - name: ✍️ Print result # ?
         id: print-result
         run: echo "${{ steps.export-scribus-pdf.outputs.pdf-file }}"
-      - name: 📢 Upload PDF as artifact
-        uses: actions/upload-artifact@v2
+      - name: ℹ️ Get next version
+        uses: reecetech/version-increment@2023.4.1
+        id: version
         with:
-          name: PDF
+          scheme: calver
+          increment: patch
+      - name: 📢 Upload PDF as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.export-scribus-pdf.outputs.pdf-file }} v${{ steps.version.outputs.major-version }}.${{ steps.version.outputs.minor-version }}-${{ steps.version.outputs.patch-version }}
           path: ${{ steps.export-scribus-pdf.outputs.pdf-file }}
       - name: 📦 Push PDF to releases
         id: pdf-release
@@ -36,9 +55,9 @@ jobs:
           files: ${{ steps.export-scribus-pdf.outputs.pdf-file }}
           draft: false
           prerelease: false
-          name: ${{ steps.export-scribus-pdf.outputs.pdf-file }} (Release-${{ github.run_id }}.${{ github.run_attempt }})
-          tag_name: ${{ github.run_id }}.${{ github.run_attempt }}-${{ github.ref }}
-          body: Scribus exported PDF file
+          name: ${{ steps.export-scribus-pdf.outputs.pdf-file }} (Release-v${{ steps.version.outputs.major-version }}.${{ steps.version.outputs.minor-version }}-${{ steps.version.outputs.patch-version }})
+          tag_name: v${{ steps.version.outputs.major-version }}.${{ steps.version.outputs.minor-version }}-${{ steps.version.outputs.patch-version }}
+          body: Scribus exported PDF file v${{ steps.version.outputs.major-version }}.${{ steps.version.outputs.minor-version }}-${{ steps.version.outputs.patch-version }}
         #env:
         #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
